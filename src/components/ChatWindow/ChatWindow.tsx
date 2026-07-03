@@ -124,7 +124,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 <p className={styles.messageText}>{message.content}</p>
                 {message.timestamp_reference && (
                   <div className={styles.timestamp}>
-                    📌 {message.timestamp_reference}
+                    {message.timestamp_reference}
                   </div>
                 )}
               </div>
