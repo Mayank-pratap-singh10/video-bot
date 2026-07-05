@@ -6,6 +6,7 @@ import { VideoInput } from './components/VideoInput/VideoInput';
 import { ChatWindow } from './components/ChatWindow/ChatWindow';
 import { ChatHistory } from './components/ChatHistory/ChatHistory';
 import { Video, Message, ChatSession } from './types';
+import API from "./api.ts";
 
 const App: React.FC = () => {
   // State Management
@@ -87,71 +88,73 @@ const App: React.FC = () => {
 
   // Handle sending message
   const handleSendMessage = useCallback(
-    (content: string) => {
-      if (!selectedVideo || !currentSessionId) return;
+  async (content: string) => {
+    if (!selectedVideo || !currentSessionId) return;
 
-      // Add user message
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        content,
-        sender: 'user',
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      content,
+      sender: "user",
+      timestamp: new Date(),
+      videoId: selectedVideo.id,
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+
+    setIsLoading(true);
+
+    try {
+
+      const response = await API.post("/ask", {
+        question: content,
+      });
+
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: response.data.answer,
+        sender: "bot",
         timestamp: new Date(),
         videoId: selectedVideo.id,
       };
 
-      setMessages((prev) => [...prev, userMessage]);
+      setMessages((prev) => [...prev, botMessage]);
 
-      // Simulate bot response
-      setIsLoading(true);
-      setTimeout(() => {
-        const botMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          content: generateBotResponse(content, selectedVideo.title),
-          sender: 'bot',
-          timestamp: new Date(),
-          videoId: selectedVideo.id,
-          timestamp_reference: generateTimestampReference(),
-        };
+      setChatSessions((prev) =>
+        prev.map((session) =>
+          session.id === currentSessionId
+            ? {
+                ...session,
+                messages: [...session.messages, userMessage, botMessage],
+                updatedAt: new Date(),
+              }
+            : session
+        )
+      );
 
-        setMessages((prev) => [...prev, botMessage]);
+    } catch (error) {
 
-        // Update session
-        setChatSessions((prev) =>
-          prev.map((session) =>
-            session.id === currentSessionId
-              ? {
-                  ...session,
-                  messages: [...session.messages, userMessage, botMessage],
-                  updatedAt: new Date(),
-                }
-              : session
-          )
-        );
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: "Backend is not running or an error occurred.",
+        sender: "bot",
+        timestamp: new Date(),
+        videoId: selectedVideo.id,
+      };
 
-        setIsLoading(false);
-      }, 1500);
-    },
-    [selectedVideo, currentSessionId]
-  );
+      setMessages((prev) => [...prev, botMessage]);
 
-  // Generate bot response (placeholder)
-  const generateBotResponse = (question: string, videoTitle: string): string => {
-    const responses = [
-      `Based on the "${videoTitle}", your question about "${question}" relates to the key concepts discussed around the ${Math.floor(Math.random() * 15) + 1} minute mark.`,
-      `Great question! The video addresses this topic in detail. According to the content, ${question.toLowerCase()} is covered extensively.`,
-      `This is an important aspect of "${videoTitle}". The video explains that the answer involves several key points related to your query.`,
-      `Excellent inquiry! The "${videoTitle}" provides a comprehensive explanation about ${question.toLowerCase()}.`,
-    ];
+      console.error(error);
 
-    return responses[Math.floor(Math.random() * responses.length)];
-  };
+    } finally {
+      setIsLoading(false);
+    }
+  },
+  [selectedVideo, currentSessionId]
+);
 
-  // Generate timestamp reference
-  const generateTimestampReference = (): string => {
-    const minutes = Math.floor(Math.random() * 120);
-    const seconds = Math.floor(Math.random() * 60);
-    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  };
+  
+
+  
 
   // Handle clearing chat
   const handleClearChat = useCallback(() => {

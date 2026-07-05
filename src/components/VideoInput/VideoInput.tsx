@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Plus, X, Copy, Check } from 'lucide-react';
 import styles from './VideoInput.module.css';
 import { Video } from '../../types';
+import API from "../../api";
 
 interface VideoInputProps {
   onAddVideo: (video: Video) => void;
@@ -18,20 +19,46 @@ export const VideoInput: React.FC<VideoInputProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const handleAddVideo = () => {
-    if (!inputValue.trim()) return;
+  const handleAddVideo = async () => {
+  if (!inputValue.trim()) return;
 
-    const video: Video = {
-      id: Date.now().toString(),
-      url: inputValue.trim(),
-      title: extractTitle(inputValue),
-      addedAt: new Date(),
-    };
+  const video: Video = {
+    id: Date.now().toString(),
+    url: inputValue.trim(),
+    title: extractTitle(inputValue),
+    addedAt: new Date(),
+  };
+
+  try {
+
+    // Extract Video ID
+    let videoId = inputValue.trim();
+
+    if (videoId.includes("youtube.com") || videoId.includes("youtu.be")) {
+
+      const match = videoId.match(
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+      );
+
+      if (match) {
+        videoId = match[1];
+      }
+    }
+
+    await API.post("/load-video", {
+      video_id: videoId,
+    });
 
     onAddVideo(video);
-    setInputValue('');
+
+    setInputValue("");
     setIsExpanded(false);
-  };
+
+  } catch (err) {
+    alert("Unable to process this video.");
+    console.log(err);
+  }
+};
 
   const extractTitle = (url: string): string => {
     const youtubeRegex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
