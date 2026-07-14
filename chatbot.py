@@ -21,9 +21,9 @@ from langchain_core.prompts import PromptTemplate
 
 load_dotenv()
 
-# -------------------------
+
 # Load Model
-# -------------------------
+
 
 model = ChatOpenAI(
     model="meta-llama-3-8b-instruct",
@@ -39,17 +39,16 @@ embeddings = OpenAIEmbeddings(
     check_embedding_ctx_length=False,
 )
 
-# -------------------------
+
 # Global Variables
-# -------------------------
 
 vector_store = None
 retriever = None
 chain = None
 
-# -------------------------
+
 # Prompt
-# -------------------------
+
 
 prompt = PromptTemplate(
     template="""
@@ -71,17 +70,17 @@ Question:
 )
 
 
-# -------------------------
+
 # Helper Function
-# -------------------------
+
 
 def format_docs(retrieved_docs):
     return "\n\n".join(doc.page_content for doc in retrieved_docs)
 
 
-# -------------------------
+
 # Load Video Function
-# -------------------------
+
 
 def load_video(video_id):
 
@@ -142,9 +141,9 @@ def load_video(video_id):
     return "Video indexed successfully."
 
 
-# -------------------------
+
 # Ask Question Function
-# -------------------------
+
 
 def ask_question(question):
 
