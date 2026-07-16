@@ -58,7 +58,7 @@ Answer ONLY from the provided transcript.
 
 If the transcript does not contain the answer,
 simply reply:
-"I don't know."
+"Information not available."
 
 Context:
 {context}
