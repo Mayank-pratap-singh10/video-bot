@@ -1,4 +1,4 @@
-// src/services/storage.ts
+
 
 const STORAGE_KEY = "video-bot-state";
 
