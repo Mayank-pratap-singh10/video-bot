@@ -7,48 +7,29 @@ import { ChatWindow } from './components/ChatWindow/ChatWindow';
 import { ChatHistory } from './components/ChatHistory/ChatHistory';
 import { Video, Message, ChatSession } from './types';
 import API from "./api.ts";
+import { useApp } from "./context/AppContext";
 
 const App: React.FC = () => {
-  // State Management
-  const [videos, setVideos] = useState<Video[]>([]);
-  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const {
+  videos,
+  setVideos,
+  selectedVideo,
+  setSelectedVideo,
+  messages,
+  setMessages,
+  chatSessions,
+  setChatSessions,
+  currentSessionId,
+  setCurrentSessionId,
+  isSidebarOpen,
+  setIsSidebarOpen,
+} = useApp();
+  
   const [isLoading, setIsLoading] = useState(false);
 
-  // Load data from localStorage on mount
-  useEffect(() => {
-    const savedVideos = localStorage.getItem('videos');
-    const savedSessions = localStorage.getItem('chatSessions');
+ 
 
-    if (savedVideos) {
-      try {
-        setVideos(JSON.parse(savedVideos));
-      } catch (e) {
-        console.error('Error loading videos:', e);
-      }
-    }
-
-    if (savedSessions) {
-      try {
-        setChatSessions(JSON.parse(savedSessions));
-      } catch (e) {
-        console.error('Error loading sessions:', e);
-      }
-    }
-  }, []);
-
-  // Save videos to localStorage
-  useEffect(() => {
-    localStorage.setItem('videos', JSON.stringify(videos));
-  }, [videos]);
-
-  // Save chat sessions to localStorage
-  useEffect(() => {
-    localStorage.setItem('chatSessions', JSON.stringify(chatSessions));
-  }, [chatSessions]);
+  
 
   // Handle adding new video
   const handleAddVideo = useCallback((video: Video) => {
